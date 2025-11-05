@@ -7,12 +7,14 @@ import json
 from datetime import datetime
 import pathlib
 
-# Foi utilizado o comando $env:API_KEY = "SUA_CHAVE_AQUI" no terminal do PowerShell para definir a variável de ambiente antes de executar o script.
-
-# Lê a chave API da variável de ambiente API_KEY
-API_KEY = os.getenv("API_KEY")
-if not API_KEY:
-    raise ValueError("A variável de ambiente API_KEY não está definida. Por favor, defina a variável com sua chave do Gemini API.")
+# Lê a chave API do arquivo API_KEY.txt
+try:
+    with open('API_KEY.txt', 'r') as file:
+        API_KEY = file.read().strip()
+    if not API_KEY:
+        raise ValueError("O arquivo API_KEY.txt está vazio. Por favor, adicione sua chave do Gemini API ao arquivo.")
+except FileNotFoundError:
+    raise FileNotFoundError("O arquivo API_KEY.txt não foi encontrado. Por favor, crie o arquivo com sua chave do Gemini API.")
 
 # Configura o cliente Gemini com a chave API
 genai.configure(api_key=API_KEY)
@@ -64,8 +66,8 @@ def mostrar_resposta(texto_resposta, history):
     # marca histórico atual como o carregado/ativo
     current_history = history
     janela_resposta = tk.Toplevel()
-    janela_resposta.title("A resposta do Lendário Ferreiro Mágico")
-    janela_resposta.geometry("600x400")
+    janela_resposta.title("A resposta do Lendário Ferreiro Mágico by Rayoloke")
+    janela_resposta.geometry("800x600")
 
     # Configurações de estilo
     COR_FUNDO, COR_TEXTO, COR_BOTAO, COR_BOTAO_HOVER, COR_TEXTO_ENTRADA = configurar_estilo()
@@ -85,14 +87,15 @@ def mostrar_resposta(texto_resposta, history):
                    border=1)
 
     # Preenche a caixa de texto com o histórico completo
-    conv_display = ''
+    texto.tag_configure("user_text", foreground=COR_TEXTO_ENTRADA)  # Configura tag para texto do usuário
+    
     for item in history:
         if item.get('role') == 'user':
-            conv_display += f"Você: {item.get('content')}\n\n"
+            texto.insert(tk.END, "Você: ", "user_text")
+            texto.insert(tk.END, f"{item.get('content')}\n\n", "user_text")
         else:
-            conv_display += f"Shibori: {item.get('content')}\n\n"
+            texto.insert(tk.END, f"Shibori: {item.get('content')}\n\n")
 
-    texto.insert(tk.END, conv_display)
     texto.config(state="disabled")  # impede edição
     texto.pack(side=tk.LEFT, expand=True, fill="both")
 
@@ -173,9 +176,11 @@ def mostrar_resposta(texto_resposta, history):
             messagebox.showerror("Erro", f"Falha ao gerar a resposta: {e}")
             return
 
-        # Anexa a nova resposta à caixa de texto e rola para o fim
+        # Anexa a mensagem do usuário e a nova resposta à caixa de texto e rola para o fim
         texto.config(state='normal')
-        texto.insert(tk.END, "\n\nShibori responde novamente:\n")
+        texto.insert(tk.END, "\n\nVocê: ")
+        texto.insert(tk.END, user_text)
+        texto.insert(tk.END, "\n\nShibori responde:\n")
         texto.insert(tk.END, novo_texto)
         texto.config(state='disabled')
         texto.see(tk.END)
