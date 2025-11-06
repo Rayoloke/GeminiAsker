@@ -142,11 +142,7 @@ def mostrar_resposta(texto_resposta, history):
     # posiciona à direita
     fechar_btn.pack(side=tk.RIGHT)
 
-    # Salva a conversa atual ao abrir a janela de resposta
-    try:
-        save_conversation(history)
-    except Exception:
-        pass
+    # Salvamento automático removido ao abrir a janela de resposta
 
     # Função para enviar resposta do usuário e obter nova resposta do modelo
     def enviar_resposta():
@@ -187,12 +183,8 @@ def mostrar_resposta(texto_resposta, history):
 
         # Limpa campo de entrada
         entrada_resposta.delete(0, tk.END)
-        # adiciona resposta do modelo ao histórico e salva
+        # adiciona resposta do modelo ao histórico (salvamento apenas manual)
         history.append({"role": "assistant", "content": novo_texto})
-        try:
-            save_conversation(history)
-        except Exception:
-            pass
 
     # Vincula o botão enviar e adiciona hover
     enviar_btn.config(command=enviar_resposta)
@@ -243,8 +235,7 @@ def armazenar_pergunta():
         {"role": "assistant", "content": resposta_texto}
     ]
 
-    # Salva a conversa inicial
-    save_conversation(history)
+    # Salvamento automático inicial removido (salvamento será feito apenas pelo botão 'Salvar conversa')
 
     # Mostra a resposta gerada com histórico completo
     mostrar_resposta(resposta_texto, history)
